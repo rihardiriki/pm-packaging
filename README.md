@@ -7,7 +7,6 @@ PWA (Progressive Web App) untuk membuat permintaan material packing per SPK. Bis
 | File | Fungsi |
 |---|---|
 | `index.html` | Aplikasi utama |
-| `Code.gs` | Backend Google Apps Script (login & sinkron riwayat). Ditempel ke Apps Script, bukan dijalankan oleh GitHub/Vercel |
 | `manifest.json` | Konfigurasi install (nama, ikon, warna) |
 | `sw.js` | Service worker (cache & offline) |
 | `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` | Ikon aplikasi |
@@ -24,9 +23,13 @@ Customer dipilih **per ukuran roll**, bukan per SPK. Contoh: dalam 1 SPK ada 3 u
 - Data lama otomatis dimigrasi: customer SPK lama menjadi customer di semua roll-nya.
 - `Code.gs` tidak perlu diubah.
 
-## Cetak & PDF: selalu 1 lembar A4
+## Form permintaan per ukuran roll & customer
 
-Berapa pun jumlah SPK dan itemnya, hasil **Cetak** dan **Unduh PDF** dibatasi maksimal 1 lembar A4. Aplikasi otomatis memilih ukuran huruf terbesar dan jumlah kolom (1–4) yang masih muat. Jika SPK/item sangat banyak, huruf akan mengecil.
+Setiap variasi ukuran roll (customer + tipe + ukuran) punya setelan sendiri: tipe packing (Suspended / Majemuk / Box), tujuan (Lokal / Ekspor), posisi roll, isi roll per pallet, dan type permintaan (khusus Varion / Supernova). Daftar item permintaan packaging di form juga dipisah per ukuran roll dan customer, lengkap dengan pilihan board dan layer besi masing-masing. Bagian **Permintaan optional** (Particle, Tali, Stretch Film, dll.) tidak dipisah per variasi roll maupun customer: satu daftar per SPK dengan satu tombol tambah. Variasi baru menyalin setelan variasi sebelumnya. Penyangga = ukuran roll + 17 (Ekspor) atau + 15 (Lokal). Dokumen, Cetak, PDF, dan WhatsApp tetap menggabungkan item per SPK. Draft lama dimigrasi otomatis: setelan SPK disalin ke tiap roll, dan item manual lama dipindah ke roll pertama, sedangkan item optional lama digabung ke satu daftar per SPK.
+
+## Cetak & PDF: menyesuaikan isi
+
+Jumlah lembar A4 mengikuti isi dokumen, tidak dipaksa 1 lembar. Ukuran huruf tetap normal, halaman baru dibuat otomatis, dan baris tabel tidak terpotong di tengah. **Unduh PDF** memberi nomor halaman (`Halaman 1 / 3`) di bagian bawah. Catatan khusus dan kotak tanda tangan selalu ada di halaman terakhir. Setiap SPK dimulai di halaman baru (SPK yang panjang boleh berlanjut ke halaman berikutnya sebelum SPK selanjutnya mulai), dan **Rekap Total Semua SPK** juga dimulai di halaman baru. Ini berlaku di Cetak dan PDF. Di WhatsApp, jika ada lebih dari 1 SPK, tombol **Kirim WhatsApp** membuka daftar pesan terpisah (satu per SPK dan satu untuk rekap) yang dikirim satu per satu, ditambah tombol **Kirim PDF lengkap**.
 
 ## Upload ke GitHub
 
@@ -54,27 +57,9 @@ Atau lewat web: buat repo baru → **Add file → Upload files** → seret semua
 - **Android (Chrome):** buka link → menu ⋮ → **Install app / Tambahkan ke layar utama**
 - **iPhone (Safari):** buka link → tombol Share → **Add to Home Screen**
 
-## Login & riwayat ikut ke perangkat lain
+## Penyimpanan data
 
-Aplikasi punya layar **Masuk / Daftar** (username + password). Riwayat permintaan, profil, daftar customer, master item, dan ukuran tersimpan tersimpan di akun (Google Sheet lewat Apps Script), jadi otomatis muncul saat masuk dari HP/komputer lain. Tetap bisa dipakai offline; perubahan dikirim otomatis saat online.
-
-### Pasang backend (sekali saja)
-
-1. Buat Google Sheet baru → **Extensions → Apps Script**.
-2. Tempel isi `Code.gs` (ada di folder ini), simpan. Jangan isi `REGISTER_CODE` di file yang ikut ke repo publik; isi kode rahasia hanya di Apps Script.
-3. **Deploy → New deployment → Web app** → *Execute as*: **Me**, *Who has access*: **Anyone** → Deploy → izinkan akses.
-4. Salin URL Web App (berakhiran `/exec`).
-5. Tempel URL itu ke konstanta `API_URL` di `index.html` (cari `const API_URL=''`). Jika dibiarkan kosong, URL bisa diisi lewat layar login.
-6. Naikkan `VERSION` di `sw.js`, lalu push.
-
-Setelah mengubah `Code.gs`: **Deploy → Manage deployments → Edit → Version: New version**, supaya URL yang sama memakai kode terbaru.
-
-### Catatan
-
-- Data lama di perangkat (sebelum ada login) otomatis dipindahkan ke akun pertama yang masuk di perangkat itu.
-- Draft yang sedang diisi (belum "Simpan Draft") hanya ada di perangkat itu; yang sudah disimpan masuk Riwayat dan ikut tersinkron.
-- Jika dua perangkat mengubah permintaan yang sama, versi yang terakhir disimpan yang dipakai.
-- Pendaftaran bisa dibatasi lewat `CFG.REGISTER_CODE` atau ditutup (`CFG.ALLOW_REGISTER=false`) di `Code.gs`.
+Aplikasi tidak memakai login. Semua data (riwayat, profil, customer, master item) tersimpan di perangkat/browser yang dipakai dan berjalan offline. Data tidak ikut ke perangkat lain.
 
 ## Update aplikasi
 
