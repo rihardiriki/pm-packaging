@@ -179,8 +179,8 @@ if(S.mv<9){S.items.forEach(i=>{if(i.name==='COREPLUG'&&!i.units.includes('pcs'))
 if(S.mv<10){if(S.szc){delete S.szc.PENYANGGA;delete S.szc.LIST}S.mv=10}
 if(S.mv<11){const NB=['PBOARD','FLYWOOD','TRIPLEX','PEFOAM'],lg=e=>{if(e&&e.dim&&e.dim.length<3&&+e.dim[0]>0&&+e.dim[1]>0)e.old=1},mg=r=>(r.sps||[r]).forEach(x=>(x.lines||[]).forEach(l=>{if(NB.includes(l.nm))lg(l)}));S.reqs.forEach(mg);if(S.cur)mg(S.cur);if(S.szc)NB.forEach(n=>(S.szc[n]||[]).forEach(lg));S.mv=11}
 /* ===== LOGIN & SINKRON RIWAYAT (Google Apps Script) ===== */
-const API_URL=''; // ← tempel URL Web App Apps Script (…/exec) di sini. Kosong = diisi lewat layar login.
-const apiUrl=()=>API_URL||localStorage.getItem('pm_api')||'';
+const API_URL='https://script.google.com/macros/s/AKfycbz4n-HXAP-LeRwMEGpO52HplhANMQg5RfRwScmjhLKQnMG_43VF-YT51aAA_Z3aScm1/exec'; // ← tempel URL Web App Apps Script (…/exec) SATU KALI di sini (oleh admin). Pengguna tidak perlu mengisi URL saat login.
+const apiUrl=()=>API_URL;
 const Cloud=(()=>{
 const SEC=['profile','items','szc','customers'],SIG={},KD=K+'_dirty',KR=K+'_rev';
 let rev=+(localStorage.getItem(KR)||0),busy=false,tm=null,dv=0,st=navigator.onLine?'idle':'off',last=0;
@@ -528,11 +528,10 @@ function showLogin(msg,keep){const reg=LM==='register',need=!apiUrl();
 $('#app').innerHTML=`<div class=lgw><div class=lgb><img src="icon-192.png" alt="" width=64 height=64><h1>PM Packaging</h1><small>Permintaan material packing per SPK</small></div>
 <div class=card><div class=vc style="margin-bottom:14px"><button type=button class="chip ${reg?'':'on'}" data-lm=login>Masuk</button><button type=button class="chip ${reg?'on':''}" data-lm=register>Daftar</button></div>
 <form id=lgf novalidate>
-${need?`<label class=f>URL backend (Apps Script)<input class=lgi id=lga placeholder="https://script.google.com/macros/s/…/exec" autocapitalize=off autocorrect=off spellcheck=false></label>`:''}
 <label class=f>Username<input class=lgi id=lgu autocomplete=username autocapitalize=off autocorrect=off spellcheck=false maxlength=20></label>
 <label class=f>Password<input class=lgi id=lgp type=password autocomplete="${reg?'new-password':'current-password'}" maxlength=64></label>
 ${reg?`<label class=f>Ulangi password<input class=lgi id=lgp2 type=password autocomplete=new-password maxlength=64></label><label class=f>Kode pendaftaran (jika diminta admin)<input class=lgi id=lgc autocomplete=off autocapitalize=off></label>`:''}
-<div class=lgm id=lge>${esc(msg||'')}</div>
+<div class=lgm id=lge>${esc(msg||(need?'Server belum diatur. Hubungi admin aplikasi.':''))}</div>
 <button class=btn id=lgs type=submit>${reg?'Buat Akun':'Masuk'}</button></form></div>
 <small class=hp style="text-align:center">Riwayat permintaan tersimpan di akun Anda, jadi otomatis ikut saat masuk dari HP atau komputer lain.</small></div>`;
 if(keep){const u=$('#lgu');if(u)u.value=keep}}
@@ -540,13 +539,13 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-lm]');if(b
 document.addEventListener('submit',async e=>{if(e.target.id!=='lgf')return;e.preventDefault();
 const reg=LM==='register',er=$('#lge'),btn=$('#lgs'),u=$('#lgu').value.trim().toLowerCase(),p=$('#lgp').value;
 const fail=m=>{er.textContent=m};
-if(!apiUrl()){const v=($('#lga')||{value:''}).value.trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(v))return fail('Isi URL Web App Apps Script yang valid (berakhiran /exec).');localStorage.setItem('pm_api',v)}
+if(!apiUrl())return fail('Server belum diatur. Hubungi admin aplikasi.');
 if(!/^[a-z0-9._-]{3,20}$/.test(u))return fail('Username 3–20 karakter: huruf, angka, titik, strip, garis bawah.');
 if(p.length<6)return fail('Password minimal 6 karakter.');
 if(reg&&p!==$('#lgp2').value)return fail('Ulangi password tidak sama.');
 btn.disabled=true;btn.textContent='Memproses…';er.textContent='';
 try{await Cloud.auth(reg?'register':'login',u,p,reg?$('#lgc').value.trim():'')}
-catch(x){fail(x.name==='AbortError'?'Koneksi lambat. Coba lagi.':x instanceof TypeError?'Tidak bisa terhubung ke server. Periksa internet dan URL backend.':x instanceof SyntaxError?'Respon server tidak valid. Pastikan Web App di-deploy dengan akses “Anyone”.':x.message||'Gagal terhubung.');btn.disabled=false;btn.textContent=reg?'Buat Akun':'Masuk'}});
+catch(x){fail(x.name==='AbortError'?'Koneksi lambat. Coba lagi.':x instanceof TypeError?'Tidak bisa terhubung ke server. Periksa koneksi internet Anda.':x instanceof SyntaxError?'Respon server tidak valid. Pastikan Web App di-deploy dengan akses “Anyone”.':x.message||'Gagal terhubung.');btn.disabled=false;btn.textContent=reg?'Buat Akun':'Masuk'}});
 if(SES){render();Cloud.start()}else showLogin();
 
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
