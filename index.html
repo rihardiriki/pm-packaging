@@ -10,8 +10,9 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--pri:#2548D0;--bg:#F8FAFC;--card:#fff;--bd:#E2E8F0;--tx:#0F172A;--tx2:#64748B;--mut:#94A3B8;--sub:#F1F5F9;--gr:#059669;--grb:#ECFDF5;--am:#D97706;--amb:#FFFBEB;--red:#DC2626;--redb:#FEF2F2;--pb:#EFF6FF;--sh:0 2px 8px -2px rgba(15,23,42,.05),0 1px 3px -1px rgba(15,23,42,.04);--sh2:0 8px 24px -4px rgba(37,72,208,.18),0 4px 8px -2px rgba(15,23,42,.06);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -137,6 +138,11 @@ small,.g3 small,.quick small,.rq small,.lh small,header small{font-size:10px}.pi
 </style></head><body>
 <div id="app"></div><div id="sh"></div><div id="tt"></div>
 <script>
+/* Jaring pengaman: jika script error saat start, tampilkan pesan + tombol pulihkan (bukan layar putih) */
+(function(){var shown=0;function fb(m){var a=document.getElementById('app');if(shown||!a||a.children.length)return;shown=1;a.innerHTML='<div style="padding:32px 20px;text-align:center;font-family:system-ui,sans-serif;text-transform:none"><h2 style="margin:0 0 8px">Aplikasi gagal dimuat</h2><p style="color:#64748B;font-size:13px;margin:0 0 16px">'+String(m||'').replace(/[<>&]/g,'')+'</p><button onclick="try{if(navigator.serviceWorker)navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister()})});if(window.caches)caches.keys().then(function(k){k.forEach(function(x){caches.delete(x)})})}catch(e){}setTimeout(function(){location.reload()},400)" style="height:48px;padding:0 20px;border-radius:12px;background:#2548D0;color:#fff;font-weight:600;border:0">Bersihkan cache &amp; muat ulang</button></div>'}
+addEventListener('error',function(e){fb(e.message)});addEventListener('unhandledrejection',function(e){fb(e.reason&&e.reason.message)});
+setTimeout(function(){fb('Tidak ada tampilan yang muncul.')},4000)})();
+
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const SES=(()=>{try{const s=JSON.parse(localStorage.getItem('pm_session'));return s&&s.u&&s.t?s:null}catch(e){return null}})();const K=SES?'pm_app_v1_'+SES.u:'pm_app_v1',pad=n=>String(n).padStart(2,'0'),uid=()=>Math.random().toString(36).slice(2,9);
 const CATS={kayu:['Kayu & Pallet','#EFF6FF'],ikat:['Pengikat & Film','#ECFDF5'],lindung:['Pelindung','#FEF3C7']};
